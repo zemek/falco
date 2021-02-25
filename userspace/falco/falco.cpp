@@ -457,6 +457,7 @@ int falco_init(int argc, char **argv)
 	bool disable_syscall = false;
 	bool disable_k8s_audit = false;
 	bool userspace = false;
+	string filter = "";
 
 	// Used for writing trace files
 	int duration_seconds = 0;
@@ -518,7 +519,7 @@ int falco_init(int argc, char **argv)
 		// Parse the args
 		//
 		while((op = getopt_long(argc, argv,
-                                        "hc:AbdD:e:F:ik:K:Ll:m:M:No:P:p:r:S:s:T:t:UuvV:w:",
+                                        "hc:AbdD:e:f:F:ik:K:Ll:m:M:No:P:p:r:S:s:T:t:UuvV:w:",
                                         long_options, &long_index)) != -1)
 		{
 			switch(op)
@@ -548,6 +549,9 @@ int falco_init(int argc, char **argv)
 				k8s_api = new string();
 				mesos_api = new string();
 #endif
+				break;
+			case 'f':
+				filter = optarg;
 				break;
 			case 'F':
 				list_flds = optarg;
@@ -731,6 +735,10 @@ int falco_init(int argc, char **argv)
 			print_all_ignored_events(inspector);
 			delete(inspector);
 			return EXIT_SUCCESS;
+		}
+		if(filter.size())
+		{
+			inspector->set_filter(filter);
 		}
 
 		engine = new falco_engine(true, alternate_lua_dir);
